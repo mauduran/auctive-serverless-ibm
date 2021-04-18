@@ -41,5 +41,4 @@ admin.env
 _meta
 .serverless
 .webpack
-serverless.yml
 .vscode/launch.json

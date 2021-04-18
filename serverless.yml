@@ -1,0 +1,90 @@
+service: ibm-functions
+
+provider:
+  name: openwhisk
+  region: us-south
+  environment:
+    tableName: ${self:custom.tableName}
+    tokenSecret: ${self:custom.tokenSecret}
+    region: ${self:provider.region}
+    imageUploadBucket: ${self:custom.imageUploadBucket}
+    usersBucket: ${self:custom.usersBucket}
+
+plugins:
+  - serverless-openwhisk
+  - serverless-webpack
+  - serverless-offline
+
+package:
+    individually: true
+    
+custom:
+    tableName: x
+    tokenSecret: x
+    imageUploadBucket: x
+    usersBucket: x
+    accessKeyId: x
+    secretAccessKey: x
+
+
+    webpack:
+      webpackConfig: ./webpack.config.js
+
+functions:
+  createVerificationRequest:
+    handler: functions/endpoints/createVerificationReq.main
+    annotations:
+      web-export: true
+    events:
+      - http:
+        method: POST
+        path: /
+        cors: true
+    parameters:
+      tableName: ${self:custom.tableName}
+      tokenSecret: ${self:custom.tokenSecret}
+      imageUploadBucket: ${self:custom.imageUploadBucket}
+      usersBucket: ${self:custom.usersBucket}
+      accessKeyId: ${self:custom.accessKeyId}
+      secretAccessKey: ${self:custom.secretAccessKey}
+
+  getPendingVerificationRequests:
+    handler: functions/endpoints/getPendingVerifications.main
+    annotations:
+      web-export: true
+    events:
+      - http:  
+        method: GET
+        path: /
+        cors: true
+
+    parameters:
+      tableName: ${self:custom.tableName}
+      tokenSecret: ${self:custom.tokenSecret}
+      imageUploadBucket: ${self:custom.imageUploadBucket}
+      usersBucket: ${self:custom.usersBucket}
+      accessKeyId: ${self:custom.accessKeyId}
+      secretAccessKey: ${self:custom.secretAccessKey}
+
+  updateVerificationRequest:
+    handler: functions/endpoints/updateVerificationReq.main
+    annotations:
+      web-export: true
+    events:
+      - http:  
+        method: PUT
+        path: /
+        cors: true
+    parameters:
+      tableName: ${self:custom.tableName}
+      tokenSecret: ${self:custom.tokenSecret}
+      imageUploadBucket: ${self:custom.imageUploadBucket}
+      usersBucket: ${self:custom.usersBucket}
+      accessKeyId: ${self:custom.accessKeyId}
+      secretAccessKey: ${self:custom.secretAccessKey}
+
+resources:
+  apigw:
+      cors: true
+      basepath: /api
+      name: auctive-verifications

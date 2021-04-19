@@ -56,7 +56,7 @@ const updateUserVerification = async (info, email) => {
 const main = async params => {
   try {
     const email = params.email;
-    const verificationStatus = params.verificationStatus;
+    let verificationStatus = params.verificationStatus;
 
     if (!email || !verificationStatus) Responses._400({ error: true, message: 'Missing fields' });
 

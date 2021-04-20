@@ -10,7 +10,14 @@ const main = async (params) => {
         if (!verification || !verification.is_admin) return Promise.reject(Responses._401({ message: 'Unauthorized' }));
 
         const Dynamo = getDynamoClient(params);
-        pending_verifications = await Dynamo.queryDocumentsSkBeginsAndOtherCondition(params.tableName, "#VERIFICATION", "USER#", "verification_status", "PENDING");
+
+        let pending_verifications = await Dynamo.queryDocumentsIndex(params.tableName, 'verification_status-index', {
+            KeyConditionExpression: "verification_status = :verification_status",
+            ExpressionAttributeValues: {
+                ":verification_status": `PENDING`,
+            }
+        });
+        // pending_verifications = await Dynamo.queryDocumentsSkBeginsAndOtherCondition(params.tableName, "#VERIFICATION", "USER#", "verification_status", "PENDING");
 
         return Responses._200({ success: true, pending_verifications: pending_verifications });
     } catch (error) {

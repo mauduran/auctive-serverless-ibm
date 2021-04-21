@@ -44,9 +44,10 @@ const updateUserVerification = async (info, email) => {
       "PK": `USER#${email}`,
       "SK": `#PROFILE#${email}`
     },
-    UpdateExpression: "set is_verified = :is_verified",
+    UpdateExpression: "set is_verified = :is_verified, pending_verification = :pending_verification",
     ExpressionAttributeValues: {
       ":is_verified": true,
+      ":pending_verification": false
     },
     IndexName: 'email-index',
   }

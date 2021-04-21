@@ -19,12 +19,27 @@ const createVerificationRequest = async (info, email, imgUrl) => {
   return Dynamo.write(info.tableName, data);
 }
 
+const updateUserPendingVerification = async (info, email) => {
+  console.log('updating user info verification');
+  const Dynamo = getDynamoClient(info);
+  let params = {
+    Key: {
+      "PK": `USER#${email}`,
+      "SK": `#PROFILE#${email}`
+    },
+    UpdateExpression: "set pending_verification = :pending_verification",
+    ExpressionAttributeValues: {
+      ":pending_verification": true
+    },
+    IndexName: 'email-index',
+  }
+  return await Dynamo.updateDocument(info.tableName, params);
+}
+
 const main = async (params) => {
   if (!params) return Responses._400({ error: true, message: 'Could not process request.' });
-
   const authorization = params.__ow_headers && params.__ow_headers.authorization;
   const verification = jwt.verify(authorization, params.tokenSecret);
-
 
   if (!verification) return Responses._401({ message: 'Unauthorized' });
 
@@ -45,6 +60,8 @@ const main = async (params) => {
     let url = `https://${params.usersBucket}.s3.amazonaws.com/${imageParams.Key}`;
 
     await createVerificationRequest(params, email, url);
+    await updateUserPendingVerification(params, email);
+
 
     return Responses._200({ success: true, message: "Created verification request" });
   } catch (error) {

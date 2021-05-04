@@ -37,7 +37,7 @@ const updateVerificationRequest = async (info, userEmail, status) => {
   return await Dynamo.updateDocument(info.tableName, params);
 }
 
-const updateUserVerification = async (info, email) => {
+const updateUserVerification = async (info, email, isVerified) => {
   const Dynamo = getDynamoClient(info);
   let params = {
     Key: {
@@ -46,7 +46,7 @@ const updateUserVerification = async (info, email) => {
     },
     UpdateExpression: "set is_verified = :is_verified, pending_verification = :pending_verification",
     ExpressionAttributeValues: {
-      ":is_verified": true,
+      ":is_verified": isVerified,
       ":pending_verification": false
     },
     IndexName: 'email-index',
@@ -74,7 +74,7 @@ const main = async params => {
 
     await createNotification(params, email, "", "", message, verification.email);
 
-    if (verificationStatus == "ACCEPTED") await updateUserVerification(params, email);
+    await updateUserVerification(params, email, verificationStatus == "ACCEPTED");
 
     return Responses._200({ success: true, verification: request_verify });
   } catch (error) {
